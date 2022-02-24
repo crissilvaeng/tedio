@@ -30,9 +30,11 @@ func main() {
 	}
 
 	router := mux.NewRouter()
-	router.HandleFunc("/games/{id}", app.Routes.GetGame).Methods(http.MethodGet)
 	router.HandleFunc("/games", app.Routes.GetGames).Methods(http.MethodGet)
 	router.HandleFunc("/games", app.Secure(app.Routes.PostGame)).Methods(http.MethodPost)
+	router.HandleFunc("/games/{id}", app.Routes.GetGame).Methods(http.MethodGet)
+	router.HandleFunc("/games/{id}/invites", app.Secure(app.Routes.GetInviteCode)).Methods(http.MethodGet)
+	// router.HandleFunc("/redeem/{invite}", app.Routes.RedeemInviteCode).Methods(http.MethodPost)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", *port),

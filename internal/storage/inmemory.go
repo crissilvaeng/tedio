@@ -3,7 +3,6 @@ package storage
 import (
 	"log"
 	"os"
-	"reflect"
 	"sync"
 	"time"
 
@@ -16,6 +15,7 @@ type InMemoryStorage struct {
 	mutex     *sync.RWMutex
 	gamesByID map[string]*models.Game
 	games     []*models.Game
+	invites   map[string]*models.InviteCode
 	logger    *log.Logger
 }
 
@@ -24,6 +24,7 @@ func NewInMemoryStorage() GameRepository {
 		mutex:     &sync.RWMutex{},
 		gamesByID: make(map[string]*models.Game),
 		games:     make([]*models.Game, 0),
+		invites:   make(map[string]*models.InviteCode),
 		logger:    log.New(os.Stdout, "storage: ", log.LstdFlags),
 	}
 }
@@ -50,7 +51,6 @@ func (s *InMemoryStorage) GetGame(id string) (*models.Game, error) {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()
 
-	s.logger.Printf("games in storage: %+v", reflect.ValueOf(s.gamesByID).MapKeys())
 	game := s.gamesByID[id]
 	if game == nil {
 		return nil, &GameNotFoundErr{ID: id}
@@ -67,4 +67,24 @@ func (s *InMemoryStorage) GetGames(limit, offset int) ([]*models.Game, error) {
 	right := misc.GetMinValue(size, offset+limit)
 
 	return s.games[left:right], nil
+}
+
+func (s *InMemoryStorage) GetInviteCode(gameID string) (*models.InviteCode, error) {
+	s.mutex.Lock()
+	defer s.mutex.Unlock()
+
+	game := s.gamesByID[gameID]
+	if game == nil {
+		return nil, &GameNotFoundErr{ID: gameID}
+	}
+
+	invite := &models.InviteCode{
+		ID:        uuid.New().String(),
+		CreatedAt: time.Now(),
+		GameID:    game.ID,
+	}
+
+	s.invites[invite.ID] = invite
+	s.logger.Printf("created invite %s: %+v", invite.ID, invite)
+	return invite, nil
 }

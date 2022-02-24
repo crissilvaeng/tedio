@@ -28,3 +28,9 @@ type Game struct {
 	WordLenght   int       `json:"word_lenght"`
 	TotalGuesses int       `json:"total_guesses"`
 }
+
+type InviteCode struct {
+	ID        string    `json:"id"`
+	CreatedAt time.Time `json:"created_at"`
+	GameID    string    `json:"game_id"`
+}

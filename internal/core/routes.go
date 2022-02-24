@@ -80,3 +80,21 @@ func (r *Routes) GetGames(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 }
+
+func (r *Routes) GetInviteCode(w http.ResponseWriter, req *http.Request) {
+	game := mux.Vars(req)["id"]
+	invite, err := r.repository.GetInviteCode(game)
+	if err != nil {
+		if ok := err.(*storage.GameNotFoundErr); ok != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(invite); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
