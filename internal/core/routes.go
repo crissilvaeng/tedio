@@ -98,3 +98,32 @@ func (r *Routes) GetInviteCode(w http.ResponseWriter, req *http.Request) {
 		return
 	}
 }
+
+func (r *Routes) RedeemInviteCode(w http.ResponseWriter, req *http.Request) {
+	invite := mux.Vars(req)["invite"]
+	decoder := json.NewDecoder(req.Body)
+	var cred models.Credentials
+	if err := decoder.Decode(&cred); err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	player, err := r.repository.RedeemInviteCode(invite, cred)
+	if err != nil {
+		if ok := err.(*storage.InviteCodeNotFoundErr); ok != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		if ok := err.(*storage.UsernameAlreadyInUseErr); ok != nil {
+			http.Error(w, err.Error(), http.StatusBadRequest)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	if err := json.NewEncoder(w).Encode(player); err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+}
