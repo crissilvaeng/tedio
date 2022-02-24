@@ -31,10 +31,11 @@ func main() {
 
 	router := mux.NewRouter()
 	router.HandleFunc("/games", app.Routes.GetGames).Methods(http.MethodGet)
-	router.HandleFunc("/games", app.Secure(app.Routes.PostGame)).Methods(http.MethodPost)
+	router.HandleFunc("/games", app.Admin(app.Routes.PostGame)).Methods(http.MethodPost)
 	router.HandleFunc("/games/{id}", app.Routes.GetGame).Methods(http.MethodGet)
-	router.HandleFunc("/games/{id}/invites", app.Secure(app.Routes.GetInviteCode)).Methods(http.MethodGet)
+	router.HandleFunc("/games/{id}/invites", app.Admin(app.Routes.GetInviteCode)).Methods(http.MethodGet)
 	router.HandleFunc("/redeem/{invite}", app.Routes.RedeemInviteCode).Methods(http.MethodPost)
+	router.HandleFunc("/me", app.Authenticate(app.Routes.WhoAmI)).Methods(http.MethodGet)
 
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%s", *port),

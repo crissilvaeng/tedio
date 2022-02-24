@@ -130,3 +130,14 @@ func (s *InMemoryStorage) RedeemInviteCode(code string, cred models.Credentials)
 	s.logger.Printf("created user %s: %+v", user.Username, user)
 	return user, nil
 }
+
+func (s *InMemoryStorage) GetPlayerByUsername(username string) (*models.Player, error) {
+	s.mutex.RLock()
+	defer s.mutex.RUnlock()
+
+	user := s.users[username]
+	if user == nil {
+		return nil, &PlayerNotFoundErr{Username: username}
+	}
+	return user, nil
+}

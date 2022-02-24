@@ -2,6 +2,7 @@ package core
 
 import (
 	"encoding/json"
+	"fmt"
 	"net/http"
 	"strconv"
 
@@ -126,4 +127,24 @@ func (r *Routes) RedeemInviteCode(w http.ResponseWriter, req *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
+}
+
+func (r *Routes) WhoAmI(w http.ResponseWriter, req *http.Request) {
+	username, _, ok := req.BasicAuth()
+	if !ok {
+		http.Error(w, "not authorized", http.StatusUnauthorized)
+		return
+	}
+
+	player, err := r.repository.GetPlayerByUsername(username)
+	if err != nil {
+		if ok := err.(*storage.PlayerNotFoundErr); ok != nil {
+			http.Error(w, err.Error(), http.StatusNotFound)
+			return
+		}
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	}
+
+	fmt.Fprintf(w, "Hello, %s!", player.Username)
 }

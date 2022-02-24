@@ -2,6 +2,7 @@ package misc
 
 import (
 	"crypto/sha256"
+	"crypto/subtle"
 	"fmt"
 
 	"github.com/google/uuid"
@@ -35,4 +36,10 @@ func GenerateSalt() string {
 func HashPassword(password, salt string) string {
 	hash := sha256.Sum256([]byte(password + salt))
 	return fmt.Sprintf("%x", hash)
+}
+
+func Compare(left, right string) bool {
+	hashleft := sha256.Sum256([]byte(left))
+	hashright := sha256.Sum256([]byte(right))
+	return subtle.ConstantTimeCompare(hashleft[:], hashright[:]) == 1
 }

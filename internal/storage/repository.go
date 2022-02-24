@@ -13,4 +13,5 @@ type GameRepository interface {
 	GetGames(limit, offset int) ([]*models.Game, error)
 	GetInviteCode(gameID string) (*models.InviteCode, error)
 	RedeemInviteCode(code string, credentials models.Credentials) (*models.Player, error)
+	GetPlayerByUsername(username string) (*models.Player, error)
 }

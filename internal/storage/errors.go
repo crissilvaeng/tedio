@@ -25,3 +25,11 @@ type UsernameAlreadyInUseErr struct {
 func (e *UsernameAlreadyInUseErr) Error() string {
 	return fmt.Sprintf("Username %s already in use", e.Username)
 }
+
+type PlayerNotFoundErr struct {
+	Username string
+}
+
+func (e *PlayerNotFoundErr) Error() string {
+	return fmt.Sprintf("Player with username %s not found", e.Username)
+}
